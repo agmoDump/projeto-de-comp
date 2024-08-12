@@ -80,45 +80,45 @@ TOKEN :
 
 TOKEN :
 {
-  <NUMERO: (["0"-"9"]) (["0"-"9", "."])*>
- |< IDENTIFICADOR: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9", "_", "-"])*>
+  <NUMERO: (["0"-"9"])+ (["0"-"9"] | ".")*>
+ | <IDENTIFICADOR: ["a"-"z", "A"-"Z"] ( ["a"-"z", "A"-"Z", "0"-"9", "_"])*>
 }
 
-void Karloff () :
+void Karloff() :
 {}
 {
     MainDeclaracao() (FuncaoDeclaracao())?
     <EOF> 
 }
 
-void MainDeclaracao():
+void MainDeclaracao() :
 {}
 {
-    <MAIN> <VOID>  <APARENTESES>  <FPARENTESES> <ACHAVES> VariavelDeclaracao() ComandoSequencia() <FCHAVES>
+    <MAIN> <VOID> <APARENTESES> <FPARENTESES> <ACHAVES> VariavelDeclaracao() ComandoSequencia() <FCHAVES>
 }
 
-void VariavelDeclaracao():
+void VariavelDeclaracao() :
 {}
 {
     ( <NEWVAR> Tipo() <IDENTIFICADOR> <PONTOEVIRGULA> )*
 }
 
-void Tipo():
+void Tipo() :
 {}
 {
     <FLOAT> | <BOOL> | <VOID>
 }
 
-void ComandoSequencia():
+void ComandoSequencia() :
 {}
 {
     Comando()*
 }
 
-void Comando():
+void Comando() :
 {}
 {
-    <IDENTIFICADOR> <IGUAL> <PONTOEVIRGULA>
+    <IDENTIFICADOR> <IGUAL> Expressao() <PONTOEVIRGULA>
     | <IF> Expressao() <THEN> <ACHAVES> ComandoSequencia() <FCHAVES> <PONTOEVIRGULA>
     | <WHILE> Expressao() <ACHAVES> ComandoSequencia() <FCHAVES> <PONTOEVIRGULA>
     | <IDENTIFICADOR> <IGUAL> <READ> <APARENTESES> <FPARENTESES> <PONTOEVIRGULA>
@@ -126,23 +126,23 @@ void Comando():
     | <PRINT> Expressao() <PONTOEVIRGULA>
 }
 
-void Expressao():
+void Expressao() :
 {}
 {
     Fator() (Operador() Fator())*
 }
 
-void Fator():
+void Fator() :
 {}
 {
     <IDENTIFICADOR>
-    | <IDENTIFICADOR> <APARENTESES> ExpressaoLista()? <FPARENTESES>
+    | <IDENTIFICADOR> <APARENTESES> (ExpressaoLista())? <FPARENTESES>
     | <NUMERO>
     | <VERDADEIRO>
     | <FALSO>
 }
 
-void Operador():
+void Operador() :
 {}
 {
     <NOT>
@@ -166,7 +166,7 @@ void Operador():
     | <DESLOCAMENTODIR>
 }
 
-void ExpressaoLista():
+void ExpressaoLista() :
 {}
 {
     Expressao() (<VIRGULA> Expressao())*
