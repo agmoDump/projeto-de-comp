@@ -1,0 +1,173 @@
+PARSER_BEGIN(Karloff)
+import java.io.*;
+public class Karloff {
+
+  public static void main(String args[]) throws ParseException, IOException {
+    Karloff analisador = new Karloff(new FileInputStream(args[0]));
+    analisador.Karloff();
+  }
+
+}
+PARSER_END(Karloff)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+TOKEN :
+{
+  <MAIN: "main">
+| <VOID: "void">
+| <FLOAT: "float">
+| <BOOL: "bool">
+
+| <IF: "if">
+| <THEN: "then">
+| <ELSE: "else">
+| <FOR: "for">
+| <DO: "do">
+| <WHILE: "while">
+
+| <NEWVAR: "newVar">
+| <READ: "readInput">
+| <RETURN: "return">
+| <PRINT: "printOut">
+
+| <ACHAVES: "{">
+| <FCHAVES: "}">
+| <APARENTESES: "(">
+| <FPARENTESES: ")">
+| <PONTOEVIRGULA: ";">
+| <VIRGULA: ",">
+
+| <IGUAL: "=">
+| <MENOR: "<">
+| <MAIOR: ">">
+| <MENORIGUAL: "<=">
+| <MAIORIGUAL: ">=">
+
+| <NOT: "!">
+| <SOMA: "+">
+| <SUBTRACAO: "-">
+| <MULTIPLICACAO: "*">
+| <DIVISAO: "/">
+| <MODULO: "%">
+| <INCREMENTO: "++">
+| <DECREMENTO: "--">
+| <ATRIBUICAOSOMA: "+=">
+| <ATRIBUICAOSUB: "-=">
+| <ATRIBUICAOMULT: "*=">
+| <ATRIBUICAODIV: "/=">
+| <ATRIBUICAOMOD: "%=">
+
+| <ANDBIT: "&">
+| <ORBIT: "|">
+| <XORBIT: "^">
+| <COMPLEMENTO1: "~">
+| <DESLOCAMENTESQ: "<<">
+| <DESLOCAMENTODIR: ">>">
+
+| <CONDICIONAL: "?">
+| <DOISPONTOS: ":">
+
+| <VERDADEIRO: "true">
+| <FALSO: "false">
+}
+
+TOKEN :
+{
+  <NUMERO: (["0"-"9"]) (["0"-"9", "."])*>
+ |< IDENTIFICADOR: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9", "_", "-"])*>
+}
+
+void Karloff () :
+{}
+{
+    MainDeclaracao() (FuncaoDeclaracao())?
+    <EOF> 
+}
+
+void MainDeclaracao():
+{}
+{
+    <MAIN> <VOID>  <APARENTESES>  <FPARENTESES> <ACHAVES> VariavelDeclaracao() ComandoSequencia() <FCHAVES>
+}
+
+void VariavelDeclaracao():
+{}
+{
+    ( <NEWVAR> Tipo() <IDENTIFICADOR> <PONTOEVIRGULA> )*
+}
+
+void Tipo():
+{}
+{
+    <FLOAT> | <BOOL> | <VOID>
+}
+
+void ComandoSequencia():
+{}
+{
+    Comando()*
+}
+
+void Comando():
+{}
+{
+    <IDENTIFICADOR> <IGUAL> <PONTOEVIRGULA>
+    | <IF> Expressao() <THEN> <ACHAVES> ComandoSequencia() <FCHAVES> <PONTOEVIRGULA>
+    | <WHILE> Expressao() <ACHAVES> ComandoSequencia() <FCHAVES> <PONTOEVIRGULA>
+    | <IDENTIFICADOR> <IGUAL> <READ> <APARENTESES> <FPARENTESES> <PONTOEVIRGULA>
+    | <RETURN> Expressao() <PONTOEVIRGULA>
+    | <PRINT> Expressao() <PONTOEVIRGULA>
+}
+
+void Expressao():
+{}
+{
+    Fator() (Operador() Fator())*
+}
+
+void Fator():
+{}
+{
+    <IDENTIFICADOR>
+    | <IDENTIFICADOR> <APARENTESES> ExpressaoLista()? <FPARENTESES>
+    | <NUMERO>
+    | <VERDADEIRO>
+    | <FALSO>
+}
+
+void Operador():
+{}
+{
+    <NOT>
+    | <SOMA>
+    | <SUBTRACAO>
+    | <MULTIPLICACAO>
+    | <DIVISAO>
+    | <MODULO>
+    | <INCREMENTO>
+    | <DECREMENTO>
+    | <ATRIBUICAOSOMA>
+    | <ATRIBUICAOSUB>
+    | <ATRIBUICAOMULT>
+    | <ATRIBUICAODIV>
+    | <ATRIBUICAOMOD>
+    | <ANDBIT>
+    | <ORBIT>
+    | <XORBIT>
+    | <COMPLEMENTO1>
+    | <DESLOCAMENTESQ>
+    | <DESLOCAMENTODIR>
+}
+
+void ExpressaoLista():
+{}
+{
+    Expressao() (<VIRGULA> Expressao())*
+}
