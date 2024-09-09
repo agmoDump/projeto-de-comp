@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo executando compilador...
+cd Ex1-3
+javac *.java
+java Compilador teste > ../Ex4/input.txt
+
+cd ../Ex4
+cat input.txt
+echo executando maquina de pilha...
+javac MaquinaPilha.java Pilha.java
+java MaquinaPilha input.txt

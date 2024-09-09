@@ -1,4 +1,0 @@
-javac MaquinaPilha.java Pilha.java
-
-java MaquinaPilha input.txt
-

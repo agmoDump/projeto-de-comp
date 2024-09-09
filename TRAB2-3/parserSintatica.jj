@@ -1,0 +1,170 @@
+PARSER_BEGIN(Karloff)
+import java.io.*;
+public class Karloff {
+
+  public static void main(String args[]) throws ParseException, IOException {
+    Karloff analisador = new Karloff(new FileInputStream(args[0]));
+    analisador.Karloff();
+  }
+
+}
+PARSER_END(Karloff)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+TOKEN :
+{
+  <MAIN: "main">
+| <ACHAVES: "{">
+| <FCHAVES: "}">
+| <APARENTESES: "(">
+| <FPARENTESES: ")">
+| <PONTOVIRG: ";">
+| <VIRGULA: ",">
+| <IGUAL: "=">
+
+| <AND: "&">
+| <OR: "|">
+
+| <SOMA: "+">
+| <SUB: "-">
+| <MULT: "*">
+| <DIV: "/">
+
+| <MENOR: "<">
+| <MAIOR: ">">
+| <IGUALDADE: "==">
+
+| <NEWVAR: "newVar">
+| <FLOAT: "float">
+| <BOOL: "boolean">
+| <VOID: "void">
+
+| <IF: "if">
+| <THEN: "then">
+
+| <WHILE: "while">
+| <READ: "readInput">
+| <RETURN: "return">
+| <PRINT: "printOut">
+
+| <VERDADEIRO: "true">
+| <FALSO: "false">
+
+| <FUNCAO: "fun">
+}
+
+TOKEN :
+{
+  <NUM: (["0"-"9"])+ ("." (["0"-"9"])+ )? ("E" ("+" | "-")? (["0"-"9"]))? >
+| <ID: ["a"-"z", "A"-"Z"] ( ["a"-"z", "A"-"Z", "0"-"9"] )* ( ( "_" )  ( ["a"-"z", "A"-"Z", "0"-"9"] )+ )* >
+}
+
+void Karloff() :
+{}
+{
+    MainDeclaracao() (Funcao())?
+    <EOF> 
+}
+
+void MainDeclaracao() :
+{}
+{
+    <VOID> <MAIN> <APARENTESES> <FPARENTESES> <ACHAVES> VariavelDeclaracao() ComandoSequencia() <FCHAVES>
+}
+
+void VariavelDeclaracao() :
+{}
+{
+    ( <NEWVAR> Tipo() <ID> <PONTOVIRG> )*
+}
+
+void Tipo() :
+{}
+{
+    <FLOAT> | <BOOL> | <VOID>
+}
+
+void ComandoSequencia() :
+{}
+{
+    ( Comando() )*
+}
+
+void Comando() :
+{}
+{
+    <ID> ComandoIdentificador()
+    | <IF> Expressao() <THEN> <ACHAVES> ComandoSequencia() <FCHAVES> <PONTOVIRG>
+    | <WHILE> Expressao() <ACHAVES> ComandoSequencia() <FCHAVES> <PONTOVIRG>
+    | <RETURN> Expressao() <PONTOVIRG>
+    | <PRINT> Expressao() <PONTOVIRG>
+}
+
+void ComandoIdentificador() :
+{}
+{
+      <APARENTESES> ( ExpressaoLista() )? <FPARENTESES> <PONTOVIRG>
+    | <IGUAL> ComandoAtribuicao()
+}
+
+void ComandoAtribuicao() :
+{}
+{
+      Expressao() <PONTOVIRG>
+    | <READ> <APARENTESES> <FPARENTESES>
+}
+
+void Expressao() :
+{}
+{
+      <APARENTESES> Expressao() Op() Expressao() <FPARENTESES>
+    | Fator()
+}
+
+void Fator() :
+{}
+{
+      <ID> ( <APARENTESES> ( ExpressaoLista() )? <FPARENTESES> )?
+    | <NUM>
+    | <VERDADEIRO>
+    | <FALSO>
+}
+
+void Op() :
+{}
+{
+      <SOMA>
+    | <SUB>
+    | <MULT>
+    | <DIV>
+    | <AND>
+    | <OR>
+    | <MENOR>
+    | <MAIOR>
+    | <IGUALDADE>
+}
+
+void ExpressaoLista() :
+{}
+{
+    Expressao() ( <VIRGULA> Expressao() )*
+}
+
+void Funcao() : 
+{}
+{
+    ( <FUNCAO> Tipo() <ID> <APARENTESES> ( ParametroLista() )? <FPARENTESES> <ACHAVES> VariavelDeclaracao() ComandoSequencia() <FCHAVES> )+
+}
+
+void ParametroLista() :
+{}
+{
+    Tipo() <ID> ( <VIRGULA> Tipo() <ID> )*
+}
