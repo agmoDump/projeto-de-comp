@@ -1,0 +1,197 @@
+PARSER_BEGIN(Karloff)
+import java.io.*;
+import java.util.ArrayList;
+import ast.*;
+
+public class Karloff {
+
+  public static void main(String args[]) throws ParseException, IOException {
+    Karloff analisador = new Karloff(new FileInputStream(args[0]));
+    Prog prog = analisador.Karloff();
+    // Aqui você pode adicionar código para gerar o código em outra linguagem
+  }
+
+}
+PARSER_END(Karloff)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+TOKEN :
+{
+  <MAIN: "main">
+| <ACHAVES: "{">
+| <FCHAVES: "}">
+| <APARENTESES: "(">
+| <FPARENTESES: ")">
+| <PONTOVIRG: ";">
+| <VIRGULA: ",">
+| <IGUAL: "=">
+
+| <AND: "&">
+| <OR: "|">
+
+| <SOMA: "+">
+| <SUB: "-">
+| <MULT: "*">
+| <DIV: "/">
+
+| <MENOR: "<">
+| <MAIOR: ">">
+| <IGUALDADE: "==">
+
+| <NEWVAR: "newVar">
+| <FLOAT: "float">
+| <BOOL: "boolean">
+| <VOID: "void">
+
+| <IF: "if">
+| <THEN: "then">
+
+| <WHILE: "while">
+| <READ: "readInput">
+| <RETURN: "return">
+| <PRINT: "printOut">
+
+| <VERDADEIRO: "true">
+| <FALSO: "false">
+
+| <FUNCAO: "fun">
+}
+
+TOKEN :
+{
+  <NUM: (["0"-"9"])+ ("." (["0"-"9"])+ )? ("E" ("+" | "-")? (["0"-"9"]))? >
+| <ID: ["a"-"z", "A"-"Z"] ( ["a"-"z", "A"-"Z", "0"-"9"] )* ( ( "_" )  ( ["a"-"z", "A"-"Z", "0"-"9"] )+ )* >
+}
+
+Prog Karloff() :
+{Main main; ArrayList<Fun> funs = new ArrayList<Fun>();}
+{
+    main = MainDeclaracao() (Funcao(funs))?
+    { return new Prog(main, funs); }
+    <EOF> 
+}
+
+Main MainDeclaracao() :
+{ArrayList<VarDecl> decls = new ArrayList<VarDecl>(); ArrayList<Cmd> coms = new ArrayList<Cmd>();}
+{
+    <VOID> <MAIN> <APARENTESES> <FPARENTESES> <ACHAVES> decls = VariavelDeclaracao() coms = ComandoSequencia() <FCHAVES>
+    { return new Main(decls, coms); }
+}
+
+ArrayList<VarDecl> VariavelDeclaracao() :
+{ArrayList<VarDecl> decls = new ArrayList<VarDecl>();}
+{
+    ( <NEWVAR> tipo = Tipo() var = <ID> <PONTOVIRG> { decls.add(new VarDecl(tipo, var)); })*
+    { return decls; }
+}
+
+Tipo Tipo() :
+{}
+{
+    <FLOAT> { return Tipo.FLOAT; }
+    | <BOOL> { return Tipo.BOOLEAN; }
+    | <VOID> { return Tipo.VOID; }
+}
+
+ArrayList<Cmd> ComandoSequencia() :
+{ArrayList<Cmd> cmds = new ArrayList<Cmd>();}
+{
+    ( Comando() { cmds.add(cmd); } )*
+    { return cmds; }
+}
+
+Cmd Comando() :
+{Cmd cmd;}
+{
+    <ID> ComandoIdentificador() { cmd = new ComandoIdentificador(<ID>, comandosIdentificador); }
+    | <IF> Expressao() <THEN> <ACHAVES> ComandoSequencia() <FCHAVES> <PONTOVIRG>
+    { cmd = new If(Expressao(), ComandoSequencia()); }
+    | <WHILE> Expressao() <ACHAVES> ComandoSequencia() <FCHAVES> <PONTOVIRG>
+    { cmd = new While(Expressao(), ComandoSequencia()); }
+    | <RETURN> Expressao() <PONTOVIRG>
+    { cmd = new Return(Expressao()); }
+    | <PRINT> Expressao() <PONTOVIRG>
+    { cmd = new Print(Expressao()); }
+}
+
+Cmd ComandoIdentificador() :
+{Cmd cmd;}
+{
+    <APARENTESES> ( ExpressaoLista() )? <FPARENTESES> <PONTOVIRG>
+    { cmd = new ChamadaFuncao(<ID>, ExpressaoLista()); }
+    | <IGUAL> ComandoAtribuicao()
+    { cmd = new Atribuicao(<ID>, ComandoAtribuicao()); }
+}
+
+Cmd ComandoAtribuicao() :
+{Exp exp;}
+{
+    exp = Expressao() <PONTOVIRG>
+    { return new Atribuicao(exp); }
+    | <READ> <APARENTESES> <FPARENTESES>
+    { return new Leitura(); }
+}
+
+Exp Expressao() :
+{Exp esq, dir; Operador op;}
+{
+    <APARENTESES> esq = Expressao() op = Op() dir = Expressao() <FPARENTESES>
+    { return new ExpBinaria(esq, op, dir); }
+    | Fator() { return new Fator(); }
+}
+
+Fator Fator() :
+{}
+{
+    <ID> ( <APARENTESES> ( ExpressaoLista() )? <FPARENTESES> )?
+    { return new Identificador(<ID>); }
+    | <NUM>
+    { return new Numero(<NUM>); }
+    | <VERDADEIRO>
+    { return new ValorBooleano(true); }
+    | <FALSO>
+    { return new ValorBooleano(false); }
+}
+
+Operador Op() :
+{}
+{
+    <SOMA> { return Operador.SOMA; }
+    | <SUB> { return Operador.SUB; }
+    | <MULT> { return Operador.MULT; }
+    | <DIV> { return Operador.DIV; }
+    | <AND> { return Operador.AND; }
+    | <OR> { return Operador.OR; }
+    | <MENOR> { return Operador.MENOR; }
+    | <MAIOR> { return Operador.MAIOR; }
+    | <IGUALDADE> { return Operador.IGUALDADE; }
+}
+
+ArrayList<Exp> ExpressaoLista() :
+{ArrayList<Exp> expList = new ArrayList<Exp>();}
+{
+    Expressao() { expList.add(exp); } ( <VIRGULA> Expressao() { expList.add(exp); } )*
+    { return expList; }
+}
+
+void Funcao(ArrayList<Fun> funs) :
+{}
+{
+    ( <FUNCAO> tipo = Tipo() <ID> <APARENTESES> ( ParametroLista() )? <FPARENTESES> <ACHAVES> VariavelDeclaracao() ComandoSequencia() <FCHAVES>
+    { funs.add(new Funcao(tipo, <ID>, ParametroLista(), VariavelDeclaracao(), ComandoSequencia())); } )+
+}
+
+ArrayList<Parametro> ParametroLista() :
+{ArrayList<Parametro> params = new ArrayList<Parametro>();}
+{
+    Tipo tipo = Tipo() <ID> { params.add(new Parametro(tipo, <ID>)); }
+    ( <VIRGULA> Tipo() <ID> { params.add(new Parametro(tipo, <ID>)); } )*
+    { return params; }
+}

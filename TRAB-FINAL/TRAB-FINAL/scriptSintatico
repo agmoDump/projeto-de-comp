@@ -1,0 +1,12 @@
+#!/bin/bash
+
+javacc parserSintatica.jj
+javac *.java
+
+echo 
+echo analisando teste.kar...
+java Karloff teste.kar
+
+echo 
+echo analisando teste2.kar...
+java Karloff teste2.kar

@@ -1,0 +1,17 @@
+void main () {
+    newVar float teste;
+    newVar boolean TesteBool;
+    newVar void ANOTHERVAR;
+
+    ANOTHERVAR ( ( 10.0 + 20.0 ), ( teste - TesteBool ), 666.666 );
+
+    TesteBool = ( true & ( true | ( false == ( false == true ) ) ) );
+
+    if ( TesteBool == true ) then {
+        teste = 10.0;
+        while ( teste > 0.0 ) {
+            printOut teste;
+            teste = ( teste - 1.0 );
+        };
+    };
+}
