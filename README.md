@@ -11,9 +11,9 @@ lexical outputs to screen, syntactic is supposed to have no output (if the .kar 
 ### TRAB 4
 to run scripts you need to right click the script, go into properties and check the permission to allow the execution as a program
 
-run script1
+run ./script1
 
-run script2
+run ./script2
 
 inputs are teste.kar and teste2.kar, respectively
 
